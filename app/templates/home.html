@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Weather App</title>
+    <style>
+        body {
+            background-color: {{ bg_color }};
+            background-size: cover;
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        form {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%; 
+            max-width: 400px;
+            margin: 0 auto; 
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .notification {
+            text-align: center;
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 400px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .notification.validation {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .notification.location {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .notification.api {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .notification.no_data {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .weather-chart {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%; 
+            max-width: 800px; 
+            margin: 20px auto;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        .weather-chart table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .weather-chart th, .weather-chart td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        .weather-chart th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+        .weather-chart tr:hover {
+            background-color: #f1f1f1;
+        }
+        .weather-chart td {
+            font-size: 14px;
+        }
+        .weather-icon {
+            font-size: 24px;
+            margin-right: 8px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+        }
+        footer a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        footer a:hover {
+            color: #cceeff;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 style="text-align: center; color: white;">Weather App</h1>
+    </header>
+    <main>
+        <!-- Search form -->
+        <form action="{{ url_for('home.home') }}" method="post">
+            <label for="locname">Location:</label>
+            <input type="text" id="locname" name="locname" placeholder="Enter location" required>
+            <label for="days">Days of forecast:</label>
+            <input type="number" id="days" name="days" min="1" max="14" required>
+            <button type="submit">Search</button>
+        </form>
+
+        <!-- Weather forecast chart -->
+        {% if weather %}
+            <div class="weather-chart">
+                <h2 style="text-align: center; color: #333;">Weather Forecast</h2>
+                <table>
+                    <tr>
+                        <th>Date</th>
+                        <th>Min Temp</th>
+                        <th>Max Temp</th>
+                        <th>Avg Humidity</th>
+                        <th>Weather</th>
+                    </tr>
+                    {% for day in weather %}
+                        <tr>
+                            <td>{{ day.date }}</td>
+                            <td>{{ day.minimum_temperture }}°C</td>
+                            <td>{{ day.maximum_temperture }}°C</td>
+                            <td>{{ day.average_humidity }}%</td>
+                            <td>
+                                <!-- Add weather icons based on temperature or humidity -->
+                                {% if day.average_humidity > 70 %}
+                                    <span class="weather-icon">🌧️</span> Rainy
+                                {% elif day.maximum_temperture > 25 %}
+                                    <span class="weather-icon">☀️</span> Sunny
+                                {% else %}
+                                    <span class="weather-icon">🌤️</span> Cloudy
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endif %}
+        <div style="text-align: center; margin-top: 15px;">
+            <a href="{{ url_for('history.view_history') }}">
+                <button type="button">View History</button>
+            </a>
+        </div>
+    </main>
+    <footer>
+        <p>Powered by <a href="https://open-meteo.com/">Open-Meteo</a></p>
+        <p>© 2025 Berry's Weather App</p>
+    </footer>
+</body>
+</html>

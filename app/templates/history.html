@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search History</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            background-color: #f7f9fc;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: #eaeaea;
+        }
+
+        pre {
+            background-color: #f0f0f0;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .no-logs {
+            text-align: center;
+            color: #666;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Search History</h1>
+
+        {% if history %}
+        <table>
+            <tr>
+                <th>City</th>
+                <th>Timestamp</th>
+                <th>Weather Forecast</th>
+            </tr>
+            {% for entry in history %}
+            <tr>
+                <td>{{ entry.city }}</td>
+                <td>{{ entry.timestamp }}</td>
+                <td>
+                    <pre>{{ entry.weather_forecast | tojson(indent=2) }}</pre>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p class="no-logs">No search history found.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

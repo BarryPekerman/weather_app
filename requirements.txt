@@ -1,0 +1,8 @@
+flask == 3.1.0
+requests
+prometheus_client
+pre-commit
+elastic-apm
+gunicorn
+concurrent-log-handler
+pymongo==4.5.0
