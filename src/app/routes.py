@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template, Response
+from flask import Blueprint, request, render_template, Response, send_file, abort
 from ..services.weather_app_service import WeatherAppService
 from ..app.database import MongoDBService
 import logging
@@ -8,6 +8,9 @@ import os
 
 # Import loggers
 from ..app.loggers import event_logger
+
+# Configuration constants
+HISTORY_LOG_DIR = os.getenv("HISTORY_LOG_DIR", "/logs/history")
 
 # Configure routes
 home_bp = Blueprint('home', __name__)
