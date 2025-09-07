@@ -1,0 +1,49 @@
+replicaCount: 1  # Reduced for testing
+
+image:
+  repository: barrype/weather-app  # Changed from -private to public
+  tag: latest
+  pullPolicy: Always
+  # Removed pullSecrets - no longer needed for public image
+
+# Removed imagePullSecrets section entirely
+
+configMapName: weather-config-blue
+
+containerPort: 5000
+
+# MongoDB configuration
+mongodb:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: true
+    database: weather
+    username: weather_user
+    password: "WeatherApp2025!"  # This will be base64 encoded in the secret
+  persistence:
+    enabled: true
+    storageClass: "standard"  # Use standard storage class in minikube
+    size: 1Gi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+# Environment variables for the application
+env:
+  - name: MONGODB_URI
+    value: "mongodb://weather_user:WeatherApp2025!@weather-app-mongodb:27017/weather"
+  - name: BG_COLOR
+    value: "#0000FF"
+
+service:
+  port: 32300
+  type: NodePort  # Changed to NodePort for minikube testing
+
+ingress:
+  enabled: false  # Disabled for minikube testing 
+

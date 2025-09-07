@@ -1,0 +1,60 @@
+1. Get the application URL by running these commands:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host }}{{ $.Values.ingress.path }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "weather-app.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "weather-app.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "weather-app.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app={{ .Chart.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:8080 to use your application"
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+{{- end }}
+
+2. Minikube specific commands:
+  minikube service {{ include "weather-app.fullname" . }} -n {{ .Release.Namespace }}
+  minikube dashboard
+
+3. Check application status:
+  kubectl get pods -n {{ .Release.Namespace }}
+  kubectl get svc -n {{ .Release.Namespace }}
+  kubectl logs -f deployment/{{ include "weather-app.fullname" . }} -n {{ .Release.Namespace }}
+
+4. MongoDB connection:
+  kubectl get pods -l app.kubernetes.io/name=mongodb -n {{ .Release.Namespace }}
+  kubectl port-forward svc/{{ include "weather-app.fullname" . }}-mongodb 27017:27017 -n {{ .Release.Namespace }}
+
+5. Application endpoints:
+  - Main app: http://<minikube-ip>:<nodeport>/
+  - Metrics: http://<minikube-ip>:<nodeport>/metrics
+  - History: http://<minikube-ip>:<nodeport>/history
+
+6. Troubleshooting:
+  - Check pod logs: kubectl logs -f deployment/{{ include "weather-app.fullname" . }} -n {{ .Release.Namespace }}
+  - Check pod status: kubectl describe pod -l app={{ .Chart.Name }} -n {{ .Release.Namespace }}
+  - Check service: kubectl describe svc {{ include "weather-app.fullname" . }} -n {{ .Release.Namespace }}
+
+7. Cleanup:
+  helm uninstall {{ .Release.Name }} -n {{ .Release.Namespace }}
+  kubectl delete namespace {{ .Release.Namespace }}
+
+{{- if .Values.mongodb.enabled }}
+8. MongoDB information:
+  - Database: {{ .Values.mongodb.auth.database }}
+  - Username: {{ .Values.mongodb.auth.username }}
+  - Password: {{ .Values.mongodb.auth.password }}
+  - Connection: mongodb://{{ .Values.mongodb.auth.username }}:{{ .Values.mongodb.auth.password }}@{{ include "weather-app.fullname" . }}-mongodb:27017/{{ .Values.mongodb.auth.database }}
+{{- end }}
+
+9. Development tips:
+  - To rebuild and redeploy: docker build -t {{ .Values.image.repository }}:{{ .Values.image.tag }} ./src && docker push {{ .Values.image.repository }}:{{ .Values.image.tag }}
+  - To update deployment: helm upgrade {{ .Release.Name }} . -f values-minikube.yaml -n {{ .Release.Namespace }}
+  - To view all resources: kubectl get all -n {{ .Release.Namespace }}
