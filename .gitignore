@@ -1,0 +1,12 @@
+# Whitelist: ignore everything
+*
+
+# Allow only these
+!.gitignore
+!helm/
+!helm/**
+!src/
+!src/**
+!src/.env.example
+
+src/.env
